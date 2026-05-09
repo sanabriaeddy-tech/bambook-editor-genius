@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bambook Editor Genius</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--terra:#B45E2C;--terra-dk:#8A4520;--terra-lt:#D4845A;--bg:#FAF7F4;--bg2:#F3EDE6;--card:#FFFFFF;--text:#2C1A0E;--text-lt:#7A5C4A;--border:#E8DDD5;--coral:#E07A6A;--azul:#4A7FA5;--ambar:#C4922A;--verde:#4A7C59;--purpura:#7B5EA7}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.status-bar{background:var(--terra-dk);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:100px;font-size:.82rem;font-weight:700;letter-spacing:.03em}
+.pill-green{background:rgba(74,124,89,.25);color:#7ED8A0;border:1px solid rgba(74,124,89,.4)}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.status-bar-title{font-family:'Playfair Display',serif;font-size:1rem;color:rgba(255,255,255,.9);font-style:italic;margin-left:auto}
+#api-banner{background:linear-gradient(135deg,#FFF8F0,#FEF0DC);border-bottom:2px solid var(--terra-lt);padding:20px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#api-banner label{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--terra-dk);white-space:nowrap}
+.api-input-wrap{display:flex;gap:8px;flex:1;min-width:260px}
+#api-key-input{flex:1;padding:10px 16px;border:2px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:.95rem;background:white;color:var(--text);outline:none;transition:border-color .2s}
+#api-key-input:focus{border-color:var(--terra)}
+.btn-sm{padding:10px 16px;border-radius:8px;border:none;font-family:'Lato',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-outline{background:white;color:var(--terra);border:2px solid var(--terra)}
+.btn-outline:hover{background:var(--terra);color:white}
+.btn-save{background:var(--terra);color:white}
+.btn-save:hover{background:var(--terra-dk);transform:translateY(-1px)}
+.main-header{text-align:center;padding:48px 24px 32px;position:relative}
+.brand-mark{display:inline-block;font-family:'Playfair Display',serif;font-size:.8rem;font-weight:700;letter-spacing:.15em;color:var(--terra);text-transform:uppercase;margin-bottom:8px;opacity:.7}
+.main-header h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--text);line-height:1.15;margin-bottom:10px}
+.main-header h1 em{font-style:italic;color:var(--terra)}
+.main-header p{font-size:1rem;color:var(--text-lt);max-width:480px;margin:0 auto;line-height:1.6}
+.tabs-wrap{max-width:860px;margin:0 auto;padding:0 24px}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:32px}
+.tab-btn{flex:1;padding:14px 20px;border:none;background:transparent;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text-lt);cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab-btn.active{color:var(--terra);border-bottom-color:var(--terra)}
+.tab-btn:disabled{opacity:.35;cursor:not-allowed}
+.tab-badge{display:inline-block;background:var(--terra);color:white;border-radius:100px;padding:1px 7px;font-size:.7rem;font-family:'Lato',sans-serif;margin-left:6px;vertical-align:middle}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.form-card{background:var(--card);border-radius:20px;padding:36px;box-shadow:0 4px 24px rgba(44,26,14,.10);margin-bottom:24px;border:1px solid var(--border)}
+.form-card h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.form-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--terra),var(--terra-lt));display:flex;align-items:center;justify-content:center;font-size:1rem;color:white;flex-shrink:0}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.form-group label{font-family:'Lato',sans-serif;font-size:.85rem;font-weight:700;color:var(--text-lt);letter-spacing:.04em;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Lato',sans-serif;font-size:.97rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;resize:vertical}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--terra);background:white}
+.toggle-wrap{display:flex;background:var(--bg2);border-radius:10px;padding:4px;gap:4px;margin-bottom:16px;width:fit-content}
+.toggle-btn{padding:8px 20px;border:none;border-radius:8px;font-family:'Lato',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-lt)}
+.toggle-btn.active{background:white;color:var(--terra);box-shadow:0 2px 8px rgba(44,26,14,.1)}
+.btn-main{width:100%;padding:18px;background:linear-gradient(135deg,var(--terra),var(--terra-lt));color:white;border:none;border-radius:12px;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;box-shadow:0 6px 24px rgba(180,94,44,.35);letter-spacing:.02em;position:relative;overflow:hidden}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(180,94,44,.4)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.loading{text-align:center;padding:48px;display:none}
+.loading-dots{display:inline-flex;gap:8px;margin-bottom:16px}
+.loading-dot{width:10px;height:10px;border-radius:50%;background:var(--terra);animation:bounce 1.2s ease-in-out infinite}
+.loading-dot:nth-child(2){animation-delay:.2s}
+.loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1.1);opacity:1}}
+.loading p{font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:var(--text-lt)}
+#resultado{display:none}
+.bienvenida-box{background:linear-gradient(135deg,var(--terra-dk),var(--terra));border-radius:16px;padding:32px;color:white;margin-bottom:24px;position:relative;overflow:hidden}
+.bienvenida-box h3{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;margin-bottom:10px}
+.bienvenida-box p{font-size:.98rem;line-height:1.7;opacity:.88}
+.score-wrap{display:flex;align-items:center;gap:24px;margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2)}
+.score-circle{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:white;line-height:1}
+.score-label{font-size:.65rem;opacity:.7;letter-spacing:.05em}
+.score-desc{font-size:.95rem;opacity:.85;line-height:1.6}
+.niveles-grid{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+.nivel-card{background:white;border-radius:14px;padding:24px;border:1px solid var(--border);box-shadow:0 4px 24px rgba(44,26,14,.07);border-left:5px solid var(--terra);transition:transform .2s}
+.nivel-card:hover{transform:translateX(4px)}
+.nivel-card.coral{border-left-color:var(--coral)}
+.nivel-card.azul{border-left-color:var(--azul)}
+.nivel-card.ambar{border-left-color:var(--ambar)}
+.nivel-card.verde{border-left-color:var(--verde)}
+.nivel-card.purpura{border-left-color:var(--purpura)}
+.nivel-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
+.nivel-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:.9rem;color:white;flex-shrink:0}
+.coral .nivel-num{background:var(--coral)}
+.azul .nivel-num{background:var(--azul)}
+.ambar .nivel-num{background:var(--ambar)}
+.verde .nivel-num{background:var(--verde)}
+.purpura .nivel-num{background:var(--purpura)}
+.nivel-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text);line-height:1.3}
+.nivel-subtitle{font-size:.78rem;color:var(--text-lt);font-weight:400;margin-top:2px}
+.nivel-body{font-size:.93rem;color:var(--text-lt);line-height:1.7}
+.kdp-card{background:linear-gradient(135deg,#FFF8F0,#FEF0DC);border-radius:14px;padding:28px;border:1px solid rgba(180,94,44,.2);margin-bottom:24px}
+.kdp-card h3{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;color:var(--terra-dk);margin-bottom:20px}
+.kdp-field{margin-bottom:16px}
+.kdp-field label{display:block;font-size:.75rem;font-weight:700;color:var(--terra);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.kdp-field p{font-size:.93rem;color:var(--text);line-height:1.6;background:white;padding:10px 14px;border-radius:8px;border:1px solid var(--border)}
+.kdp-keywords{display:flex;flex-wrap:wrap;gap:8px}
+.kw-tag{background:white;border:1px solid rgba(180,94,44,.25);border-radius:100px;padding:4px 12px;font-size:.82rem;color:var(--terra-dk);font-weight:600}
+.locked-notice{text-align:center;padding:48px 24px;background:var(--bg2);border-radius:16px;border:2px dashed var(--border)}
+.locked-notice p{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--text-lt);margin-top:12px}
+.veredicto-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+.veredicto-opt{padding:16px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;text-align:center;background:white}
+.veredicto-opt:hover{border-color:var(--terra)}
+.veredicto-opt.selected{border-color:var(--terra);background:linear-gradient(135deg,#FFF8F0,#FEF0DC)}
+.opt-icon{font-size:1.5rem;margin-bottom:6px}
+.opt-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--text)}
+.opt-desc{font-size:.78rem;color:var(--text-lt);margin-top:3px}
+#carta-resultado{display:none}
+.carta-box{background:white;border-radius:16px;padding:36px;border:1px solid var(--border);box-shadow:0 12px 48px rgba(44,26,14,.16);position:relative}
+.carta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--terra),var(--ambar),var(--coral));border-radius:16px 16px 0 0}
+.carta-header{text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.carta-header .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;color:var(--terra);letter-spacing:.05em}
+.carta-header .carta-subtitle{font-size:.82rem;color:var(--text-lt);font-style:italic;margin-top:2px}
+.carta-content{font-size:.97rem;line-height:1.85;color:var(--text);white-space:pre-wrap;font-family:'Lato',sans-serif}
+.carta-firma{margin-top:32px;padding-top:24px;border-top:1px solid var(--border);font-family:'Playfair Display',serif;font-style:italic;color:var(--text-lt);font-size:.95rem;line-height:1.8}
+.btn-copy{display:block;width:100%;margin-top:20px;padding:14px;background:var(--bg2);color:var(--terra-dk);border:2px solid var(--border);border-radius:10px;font-family:'Lato',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-copy:hover{background:var(--terra);color:white;border-color:var(--terra)}
+.btn-copy.copied{background:var(--verde);color:white;border-color:var(--verde)}
+.error-box{background:#FFF0F0;border:1px solid #FFCDD2;border-radius:10px;padding:16px 20px;color:#B71C1C;font-size:.9rem;margin-top:16px;display:none}
+@media(max-width:640px){.form-row{grid-template-columns:1fr}.form-card{padding:24px}.veredicto-opts{grid-template-columns:1fr}.score-wrap{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+  <span class="pill pill-green"><span class="pill-dot"></span>Eddy</span>
+  <span class="pill pill-green">✓ Bambook Editor Genius</span>
+  <span class="status-bar-title">Editorial Bambook · Historias que abrazan</span>
+</div>
+
+<div id="api-banner">
+  <label for="api-key-input">🔑 API Key Anthropic</label>
+  <div class="api-input-wrap">
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off">
+    <button class="btn-sm btn-outline" id="btn-toggle-key" onclick="toggleKey()">Mostrar</button>
+    <button class="btn-sm btn-save" onclick="saveKey()">Guardar</button>
+  </div>
+</div>
+
+<div class="main-header">
+  <div class="brand-mark">✦ Editorial Bambook ✦</div>
+  <h1>Bambook<br><em>Editor Genius</em></h1>
+  <p>Protocolo editorial avanzado para dar voz a los escritores latinoamericanos que merecen ser leídos.</p>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-eval" onclick="switchTab('evaluacion')">① Evaluación Diamante</button>
+    <button class="tab-btn" id="tab-carta-btn" onclick="switchTab('carta')" disabled>② Carta de Feedback<span class="tab-badge" id="carta-badge" style="display:none">Listo</span></button>
+  </div>
+
+  <div id="pane-evaluacion" class="tab-pane active">
+    <div class="form-card">
+      <h2><span class="form-icon">✦</span>Protocolo Diamante</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Título del manuscrito</label>
+          <input type="text" id="titulo" placeholder="Ej. El jardín de los sueños">
+        </div>
+        <div class="form-group">
+          <label>Rango de edad</label>
+          <select id="edad">
+            <option value="4-6">4–6 años</option>
+            <option value="5-8">5–8 años</option>
+            <option value="6-10" selected>6–10 años</option>
+            <option value="7-12">7–12 años</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Manuscrito</label>
+        <div class="toggle-wrap">
+          <button class="toggle-btn active" onclick="setFuente('texto',this)">Pegar texto</button>
+          <button class="toggle-btn" onclick="setFuente('pdf',this)">Subir PDF</button>
+        </div>
+        <div id="fuente-texto">
+          <textarea id="manuscrito-texto" rows="10" placeholder="Pega aquí el texto completo del cuento…"></textarea>
+        </div>
+        <div id="fuente-pdf" style="display:none">
+          <div style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;background:var(--bg2);cursor:pointer" onclick="document.getElementById('pdf-file').click()">
+            <div style="font-size:2rem;margin-bottom:8px">📄</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-lt)">Haz clic para seleccionar el PDF</div>
+          </div>
+          <input type="file" id="pdf-file" accept=".pdf" style="display:none" onchange="loadPDF(this)">
+          <div id="pdf-nombre" style="margin-top:10px;font-size:.88rem;color:var(--verde);font-weight:700"></div>
+        </div>
+      </div>
+      <div class="error-box" id="error-eval"></div>
+      <button class="btn-main" id="btn-evaluar" onclick="evaluar()">Aplicar el Protocolo Diamante ✦</button>
+    </div>
+
+    <div class="loading" id="loading-eval">
+      <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+      <p>El Protocolo Diamante está analizando el manuscrito…</p>
+    </div>
+
+    <div id="resultado">
+      <div class="bienvenida-box">
+        <h3 id="r-titulo"></h3>
+        <p id="r-bienvenida"></p>
+        <div class="score-wrap">
+          <div class="score-circle"><span class="score-num" id="r-score">—</span><span class="score-label">/10</span></div>
+          <div class="score-desc" id="r-score-desc"></div>
+        </div>
+      </div>
+      <div class="niveles-grid">
+        <div class="nivel-card coral"><div class="nivel-header"><div class="nivel-num">1</div><div><div class="nivel-title">El Pulso de la Empatía</div><div class="nivel-subtitle">El Abrazo</div></div></div><div class="nivel-body" id="r-n1"></div></div>
+        <div class="nivel-card azul"><div class="nivel-header"><div class="nivel-num">2</div><div><div class="nivel-title">Arquitectura Lingüística Evolutiva</div><div class="nivel-subtitle">Ajuste de Lenguaje</div></div></div><div class="nivel-body" id="r-n2"></div></div>
+        <div class="nivel-card ambar"><div class="nivel-header"><div class="nivel-num">3</div><div><div class="nivel-title">El Gen de la Imaginación</div><div class="nivel-subtitle">Active Learning</div></div></div><div class="nivel-body" id="r-n3"></div></div>
+        <div class="nivel-card verde"><div class="nivel-header"><div class="nivel-num">4</div><div><div class="nivel-title">Blindaje Cultural Latino</div><div class="nivel-subtitle">Identidad Regional</div></div></div><div class="nivel-body" id="r-n4"></div></div>
+        <div class="nivel-card purpura"><div class="nivel-header"><div class="nivel-num">5</div><div><div class="nivel-title">Potencial de Legado</div><div class="nivel-subtitle">KDP Strategy</div></div></div><div class="nivel-body" id="r-n5"></div></div>
+      </div>
+      <div class="kdp-card">
+        <h3>📦 Metadatos KDP</h3>
+        <div class="kdp-field"><label>Título optimizado</label><p id="r-kdp-titulo"></p></div>
+        <div class="kdp-field"><label>Subtítulo con keywords</label><p id="r-kdp-sub"></p></div>
+        <div class="kdp-field"><label>Descripción Amazon</label><p id="r-kdp-desc"></p></div>
+        <div class="kdp-field"><label>7 Keywords</label><div class="kdp-keywords" id="r-kdp-kw"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pane-carta" class="tab-pane">
+    <div id="locked-msg" class="locked-notice">
+      <div style="font-size:2.5rem">✦</div>
+      <p>Completa la Evaluación Diamante para desbloquear la Carta de Feedback.</p>
+    </div>
+    <div id="carta-form" style="display:none">
+      <div class="form-card">
+        <h2><span class="form-icon">💌</span>El Abrazo Literario</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del autor / autora</label>
+            <input type="text" id="autor-nombre" placeholder="Ej. María García">
+          </div>
+          <div class="form-group">
+            <label>Convocatoria</label>
+            <input type="text" id="convocatoria" placeholder="Ej. Antología Infantil 2026">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Veredicto</label>
+          <div class="veredicto-opts">
+            <div class="veredicto-opt" id="opt-a" onclick="selectV('A')"><div class="opt-icon">⭐</div><div class="opt-title">Opción A — Selección</div><div class="opt-desc">El manuscrito será publicado</div></div>
+            <div class="veredicto-opt" id="opt-b" onclick="selectV('B')"><div class="opt-icon">✏️</div><div class="opt-title">Opción B — Seguir puliendo</div><div class="opt-desc">Necesita más trabajo editorial</div></div>
+          </div>
+        </div>
+        <div class="error-box" id="error-carta"></div>
+        <button class="btn-main" id="btn-carta" onclick="generarCarta()" style="margin-top:20px">Generar El Abrazo Literario ✦</button>
+      </div>
+      <div class="loading" id="loading-carta">
+        <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+        <p>Redactando la carta con el corazón de Bambook…</p>
+      </div>
+      <div id="carta-resultado">
+        <div class="carta-box">
+          <div class="carta-header"><div class="logo-text">BAMBOOK</div><div class="carta-subtitle">Historias que abrazan</div></div>
+          <div class="carta-content" id="carta-texto"></div>
+          <div class="carta-firma">Con admiración y respeto,<br><strong>Bambook Editor Genius</strong><br>En representación de Kattia Orellana B. y el equipo de Editorial Bambook</div>
+        </div>
+        <button class="btn-copy" id="btn-copy" onclick="copiarCarta()">Copiar carta al portapapeles</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="height:60px"></div>
+
+<script>
+let apiKey='',evalData=null,veredicto='',pdfB64='',fuente='texto';
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const k=localStorage.getItem('bg_api_key');
+  if(k&&k.startsWith('sk-ant')){apiKey=k;document.getElementById('api-banner').style.display='none';document.getElementById('api-key-input').value=k}
+});
+
+function toggleKey(){const i=document.getElementById('api-key-input'),b=document.getElementById('btn-toggle-key');i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'Mostrar':'Ocultar'}
+
+function saveKey(){
+  const v=document.getElementById('api-key-input').value.trim();
+  if(!v||!v.startsWith('sk-ant')){alert('La API Key debe empezar con sk-ant...');return}
+  apiKey=v;localStorage.setItem('bg_api_key',v);
+  document.getElementById('api-banner').style.display='none';
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+(t==='evaluacion'?'eval':'carta-btn')).classList.add('active');
+  document.getElementById('pane-'+t).classList.add('active');
+}
+
+function setFuente(t,btn){
+  fuente=t;
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fuente-texto').style.display=t==='texto'?'block':'none';
+  document.getElementById('fuente-pdf').style.display=t==='pdf'?'block':'none';
+}
+
+function loadPDF(input){
+  const f=input.files[0];if(!f)return;
+  document.getElementById('pdf-nombre').textContent='📄 '+f.name;
+  const r=new FileReader();
+  r.onload=e=>{pdfB64=e.target.result.split(',')[1]};
+  r.readAsDataURL(f);
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+function hideErr(id){document.getElementById(id).style.display='none'}
+
+async function callAPI(messages,system){
+  if(!apiKey||!apiKey.startsWith('sk-ant'))throw new Error('API Key inválida. Recarga e ingresa tu API Key correctamente.');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,system,messages})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Error '+r.status)}
+  const d=await r.json();
+  return d.content[0].text;
+}
+
+async function evaluar(){
+  const titulo=document.getElementById('titulo').value.trim();
+  const edad=document.getElementById('edad').value;
+  const texto=fuente==='texto'?document.getElementById('manuscrito-texto').value.trim():(pdfB64?'[PDF adjunto]':'');
+  if(!titulo||!texto){showErr('error-eval','Completa el título y el contenido del manuscrito.');return}
+  if(!apiKey){showErr('error-eval','Guarda tu API Key primero.');return}
+  hideErr('error-eval');
+  document.getElementById('loading-eval').style.display='block';
+  document.getElementById('resultado').style.display='none';
+  document.getElementById('btn-evaluar').disabled=true;
+
+  const sys=`Eres el Bambook Editor Genius, agente editorial de Bambook, editorial infantil latinoamericana de Kattia Orellana B. Eslogan: "Historias que abrazan". Publicas cuentos para niños de 4-12 años sobre emociones, identidad cultural latinoamericana e imaginación. Responde ÚNICAMENTE con JSON válido sin markdown.`;
+
+  const prompt=`Evalúa este manuscrito con el Protocolo Diamante de Bambook.
+TÍTULO: ${titulo}
+EDAD: ${edad} años
+MANUSCRITO: ${texto}
+
+Responde con este JSON exacto (sin markdown):
+{"bienvenida_titulo":"frase cálida de bienvenida","bienvenida_texto":"párrafo de 2-3 líneas de primera impresión","puntuacion":8.2,"puntuacion_descripcion":"descripción de la puntuación","nivel_1":"análisis del Pulso de la Empatía 3-4 líneas","nivel_2":"análisis Arquitectura Lingüística para edad ${edad} 3-4 líneas","nivel_3":"análisis Gen de la Imaginación 3-4 líneas","nivel_4":"análisis Blindaje Cultural Latino 3-4 líneas","nivel_5":"análisis Potencial de Legado KDP 3-4 líneas","kdp_titulo":"título optimizado Amazon","kdp_subtitulo":"subtítulo con keywords","kdp_descripcion":"descripción 100-150 palabras para Amazon","kdp_keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7"]}`;
+
+  try{
+    const msgs=fuente==='pdf'&&pdfB64
+      ?[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:pdfB64}},{type:'text',text:prompt}]}]
+      :[{role:'user',content:prompt}];
+    const raw=await callAPI(msgs,sys);
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    evalData={titulo,edad,...d};
+    renderEval(d);
+    document.getElementById('tab-carta-btn').disabled=false;
+    document.getElementById('carta-badge').style.display='inline';
+    document.getElementById('locked-msg').style.display='none';
+    document.getElementById('carta-form').style.display='block';
+  }catch(e){showErr('error-eval','Error: '+e.message)}
+  finally{document.getElementById('loading-eval').style.display='none';document.getElementById('btn-evaluar').disabled=false}
+}
+
+function renderEval(d){
+  document.getElementById('resultado').style.display='block';
+  document.getElementById('r-titulo').textContent=d.bienvenida_titulo||'';
+  document.getElementById('r-bienvenida').textContent=d.bienvenida_texto||'';
+  document.getElementById('r-score').textContent=d.puntuacion||'—';
+  document.getElementById('r-score-desc').textContent=d.puntuacion_descripcion||'';
+  ['1','2','3','4','5'].forEach(n=>document.getElementById('r-n'+n).textContent=d['nivel_'+n]||'');
+  document.getElementById('r-kdp-titulo').textContent=d.kdp_titulo||'';
+  document.getElementById('r-kdp-sub').textContent=d.kdp_subtitulo||'';
+  document.getElementById('r-kdp-desc').textContent=d.kdp_descripcion||'';
+  const kw=document.getElementById('r-kdp-kw');kw.innerHTML='';
+  (d.kdp_keywords||[]).forEach(k=>{const s=document.createElement('span');s.className='kw-tag';s.textContent=k;kw.appendChild(s)});
+  document.getElementById('resultado').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function selectV(v){
+  veredicto=v;
+  document.querySelectorAll('.veredicto-opt').forEach(e=>e.classList.remove('selected'));
+  document.getElementById('opt-'+v.toLowerCase()).classList.add('selected');
+}
+
+async function generarCarta(){
+  const nombre=document.getElementById('autor-nombre').value.trim();
+  const conv=document.getElementById('convocatoria').value.trim();
+  if(!nombre||!conv||!veredicto){showErr('error-carta','Completa todos los campos y selecciona el veredicto.');return}
+  hideErr('error-carta');
+  document.getElementById('loading-carta').style.display='block';
+  document.getElementById('carta-resultado').style.display='none';
+  document.getElementById('btn-carta').disabled=true;
+
+  const sys=`Eres el Bambook Editor Genius. Redactas cartas de feedback literario para escritores latinoamericanos de Bambook. Tono cálido y riguroso. Responde SOLO con el texto de la carta, sin JSON ni markdown.`;
+
+  const prompt=`Redacta "El Abrazo Literario" para:
+AUTOR/A: ${nombre}
+CONVOCATORIA: ${conv}
+TÍTULO: ${evalData?.titulo||''}
+PUNTUACIÓN: ${evalData?.puntuacion||''}/10
+VEREDICTO: ${veredicto==='A'?'SELECCIÓN — será publicado':'SEGUIR PULIENDO — necesita desarrollo'}
+
+EVALUACIÓN:
+Empatía: ${evalData?.nivel_1||''}
+Lenguaje: ${evalData?.nivel_2||''}
+Imaginación: ${evalData?.nivel_3||''}
+Cultural: ${evalData?.nivel_4||''}
+Legado: ${evalData?.nivel_5||''}
+
+Secciones: 1) Saludo emotivo 2) ✦ LUCES — lo que brilla (mínimo 3 aspectos) 3) ✦ OPORTUNIDADES — mejoras alentadoras 4) ✦ VEREDICTO — ${veredicto==='A'?'anuncio de publicación':'invitación a seguir puliendo'} 5) Cierre inspirador. NO incluyas firma.`;
+
+  try{
+    const raw=await callAPI([{role:'user',content:prompt}],sys);
+    document.getElementById('carta-texto').textContent=raw.trim();
+    document.getElementById('carta-resultado').style.display='block';
+    document.getElementById('carta-resultado').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){showErr('error-carta','Error: '+e.message)}
+  finally{document.getElementById('loading-carta').style.display='none';document.getElementById('btn-carta').disabled=false}
+}
+
+function copiarCarta(){
+  const t=document.getElementById('carta-texto').textContent;
+  const firma='\n\nCon admiración y respeto,\nBambook Editor Genius\nEn representación de Kattia Orellana B. y el equipo de Editorial Bambook';
+  navigator.clipboard.writeText(t+firma).then(()=>{
+    const b=document.getElementById('btn-copy');
+    b.textContent='✓ ¡Copiado!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='Copiar carta al portapapeles';b.classList.remove('copied')},3000);
+  });
+}
+</script>
+</body>
+</html>
