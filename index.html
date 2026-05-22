@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bambook Editor Genius</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:#FAF7F4;color:#2C2C2A;min-height:100vh;padding:2rem 1rem 4rem}
+.wrap{max-width:700px;margin:0 auto}
+.statusbar{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem}
+.pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #3B6D11;background:#EAF3DE;color:#3B6D11}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:#3B6D11;flex-shrink:0}
+.hdr{text-align:center;padding:2rem 1rem 1.5rem;border-bottom:1px solid #E0DDD8;margin-bottom:1.75rem}
+.stars{color:#B45E2C;letter-spacing:6px;font-size:13px;margin-bottom:8px}
+.logo{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:6px}
+.logo span{font-style:italic;color:#B45E2C}
+.sub{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#888780;font-weight:700}
+.tabs{display:flex;border:1px solid #D3D1C7;border-radius:10px;overflow:hidden;margin-bottom:2rem}
+.tab{flex:1;padding:12px 8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:#F1EFE8;color:#888780;border:none;font-family:'Lato',sans-serif;transition:all 0.2s}
+.tab.active{background:#B45E2C;color:#FFF8F2}
+.panel{display:none}.panel.visible{display:block}
+.field{margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lbl{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#888780;margin-bottom:6px}
+input[type=text]{width:100%;padding:10px 12px;font-size:14px;font-family:'Lato',sans-serif;border:1px solid #D3D1C7;border-radius:8px;background:#fff;color:#2C2C2A;outline:none}
+input[type=text]:focus{border-color:#B45E2C}
+select{width:100%;padding:10px 12px;font-size:14px;font-family:'Lato',sans-serif;border:1px solid #D3D1C7;border-radius:8px;background:#fff;color:#2C2C2A;outline:none;cursor:pointer}
+select:focus{border-color:#B45E2C}
+textarea{width:100%;min-height:160px;padding:10px 12px;font-size:14px;font-family:'Lato',sans-serif;line-height:1.7;border:1px solid #D3D1C7;border-radius:8px;background:#fff;color:#2C2C2A;outline:none;resize:vertical}
+textarea:focus{border-color:#B45E2C}
+.itoggle{display:flex;gap:8px;margin-bottom:14px}
+.ibtn{flex:1;padding:9px;font-size:12px;font-weight:700;font-family:'Lato',sans-serif;border:1px solid #D3D1C7;border-radius:8px;cursor:pointer;background:#F1EFE8;color:#888780;transition:all 0.15s}
+.ibtn.active{background:#B45E2C;color:#FFF8F2;border-color:#B45E2C}
+.upload{border:2px dashed #D3D1C7;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;background:#F1EFE8;position:relative;transition:all 0.2s}
+.upload:hover{border-color:#B45E2C;background:#FDF6F2}
+.upload.loaded{border-color:#3B6D11;background:#EAF3DE}
+.upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:32px;margin-bottom:10px}
+.upload-title{font-size:15px;font-weight:700;color:#2C2C2A;margin-bottom:4px}
+.upload-sub{font-size:12px;color:#888780}
+.upload-name{font-size:13px;font-weight:700;color:#3B6D11;margin-top:8px;display:none}
+.main-btn{width:100%;margin-top:12px;padding:15px;font-size:16px;font-family:'Playfair Display',serif;font-weight:600;font-style:italic;background:#B45E2C;color:#FFF8F2;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.3px;transition:opacity 0.2s}
+.main-btn:hover{opacity:0.88}
+.main-btn:disabled{opacity:0.4;cursor:not-allowed}
+.sec-btn{width:100%;margin-top:10px;padding:11px;font-size:13px;font-family:'Lato',sans-serif;background:transparent;color:#888780;border:1px solid #D3D1C7;border-radius:8px;cursor:pointer}
+.sec-btn:hover{background:#F1EFE8}
+.divider{border:none;border-top:1px solid #E0DDD8;margin:1.5rem 0}
+.loading{display:none;text-align:center;padding:2rem;font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#888780}
+.loading.on{display:block}
+.loading::after{content:'';animation:dots 1.4s infinite}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.error{display:none;margin-top:10px;padding:12px;font-size:13px;color:#A32D2D;background:#FCEBEB;border-radius:8px;line-height:1.5}
+.error.on{display:block}
+.blockquote{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.7;padding:1.25rem 1.5rem;background:#F9F5F1;border-left:3px solid #B45E2C;border-radius:10px;margin-bottom:1.5rem}
+.score-row{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:1.5rem}
+.score-ring{width:80px;height:80px;border-radius:50%;border:2.5px solid #B45E2C;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:#B45E2C;line-height:1}
+.score-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888780;margin-top:2px}
+.score-verdict{font-size:14px;color:#5F5E5A;font-style:italic;max-width:220px;line-height:1.5;text-align:center}
+.d-grid{display:grid;gap:12px;margin-bottom:1.5rem}
+.d-card{background:#fff;border:1px solid #E0DDD8;border-radius:12px;padding:1rem 1.25rem}
+.d-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.d-badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.c1{background:#FAECE7;color:#993C1D}.c2{background:#E6F1FB;color:#185FA5}.c3{background:#FAEEDA;color:#854F0B}.c4{background:#EAF3DE;color:#3B6D11}.c5{background:#EEEDFE;color:#534AB7}
+.d-name{font-size:14px;font-weight:700;color:#2C2C2A}
+.d-sub{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#888780}
+.d-body{font-size:14px;color:#444441;line-height:1.65}
+.kdp-box{background:#F1EFE8;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem}
+.kdp-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#888780;margin-bottom:12px}
+.kdp-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}
+.kdp-k{font-size:11px;font-weight:700;color:#B45E2C;min-width:80px;padding-top:2px;flex-shrink:0}
+.kdp-v{font-size:13px;color:#2C2C2A;line-height:1.55}
+.v-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.v-opt{padding:12px;border:1px solid #D3D1C7;border-radius:10px;cursor:pointer;font-size:13px;font-family:'Lato',sans-serif;text-align:center;background:#F1EFE8;color:#888780;transition:all 0.15s}
+.v-opt.selected{border-color:#B45E2C;background:#FAECE7;color:#993C1D;font-weight:700}
+.carta-preview{background:#fff;border:1px solid #E0DDD8;border-radius:12px;padding:1.75rem;margin-bottom:14px;font-size:14px;line-height:1.8;color:#2C2C2A}
+.carta-preview p{margin-bottom:7px}
+.copy-btn{width:100%;padding:12px;font-size:13px;font-family:'Lato',sans-serif;font-weight:700;background:transparent;color:#B45E2C;border:1.5px solid #B45E2C;border-radius:10px;cursor:pointer}
+.copy-btn:hover{background:#FAECE7}
+@media(max-width:500px){.grid2{grid-template-columns:1fr}.v-opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="statusbar">
+  <div class="pill"><span class="dot"></span> Eddy</div>
+  <div class="pill">✓ Bambook Editor Genius</div>
+</div>
+
+<div class="hdr">
+  <div class="stars">✦ ✦ ✦</div>
+  <div class="logo">Bambook <span>Editor Genius</span></div>
+  <div class="sub">Protocolo Diamante · El Abrazo Literario</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab1" onclick="showTab(1)">① Evaluación Diamante</button>
+  <button class="tab" id="tab2" onclick="showTab(2)">② Carta de Feedback</button>
+</div>
+
+<div class="panel visible" id="panel1">
+  <div class="field grid2">
+    <div>
+      <label class="lbl">Título del manuscrito</label>
+      <input type="text" id="titleInput" placeholder="Ej. El jardín de Luna" />
+    </div>
+    <div>
+      <label class="lbl">Rango de edad</label>
+      <select id="ageSelect">
+        <option value="4-6 años">4–6 años</option>
+        <option value="5-8 años">5–8 años</option>
+        <option value="6-10 años" selected>6–10 años</option>
+        <option value="7-12 años">7–12 años</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label class="lbl">Ingresá el manuscrito</label>
+    <div class="itoggle">
+      <button class="ibtn active" id="btnPDF" onclick="switchMode('pdf')">📄 Subir PDF</button>
+      <button class="ibtn" id="btnText" onclick="switchMode('text')">✏️ Pegar texto</button>
+    </div>
+    <div id="pdfArea">
+      <div class="upload" id="uploadBox">
+        <input type="file" id="fileInput" accept=".pdf" onchange="onFileSelected(this)" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-title" id="uploadTitle">Hacé clic aquí para subir tu PDF</div>
+        <div class="upload-sub">El texto se extrae automáticamente del PDF</div>
+        <div class="upload-name" id="uploadName"></div>
+      </div>
+    </div>
+    <div id="textArea" style="display:none">
+      <textarea id="textInput" placeholder="Pegá aquí el cuento completo..."></textarea>
+    </div>
+  </div>
+  <button class="main-btn" id="evalBtn" onclick="runEval()">Aplicar el Protocolo Diamante ✦</button>
+  <div class="loading" id="evalLoading">Leyendo tu historia con el corazón</div>
+  <div class="error" id="evalError"></div>
+  <div id="evalResult" style="display:none">
+    <hr class="divider" />
+    <div class="blockquote" id="resBienvenida"></div>
+    <div class="score-row">
+      <div class="score-ring"><span class="score-num" id="resPuntuacion">—</span><span class="score-lbl">Diamante</span></div>
+      <div class="score-verdict" id="resVeredicto"></div>
+    </div>
+    <div class="d-grid" id="resNiveles"></div>
+    <div class="kdp-box" id="resKdp" style="display:none">
+      <div class="kdp-title">Metadatos KDP · Amazon</div>
+      <div id="resKdpContent"></div>
+    </div>
+    <button class="main-btn" style="margin-top:0" onclick="irACarta()">Generar Carta "El Abrazo Literario" →</button>
+    <button class="sec-btn" onclick="resetEval()">← Evaluar otro manuscrito</button>
+  </div>
+</div>
+
+<div class="panel" id="panel2">
+  <div id="cartaSinData" class="blockquote" style="display:none">Primero completá la evaluación en el Paso 1.</div>
+  <div id="cartaFormDiv" style="display:none">
+    <div class="field grid2">
+      <div><label class="lbl">Nombre del autor/a</label><input type="text" id="authorInput" placeholder="Ej. María González" /></div>
+      <div><label class="lbl">Convocatoria</label><input type="text" id="convInput" placeholder="Ej. Convocatoria 2025" /></div>
+    </div>
+    <div class="field">
+      <label class="lbl">Veredicto editorial</label>
+      <div class="v-opts">
+        <div class="v-opt selected" id="vOptA" onclick="selectVeredicto('A')">✦ Selección — Avanzar a publicación</div>
+        <div class="v-opt" id="vOptB" onclick="selectVeredicto('B')">◈ Seguir puliendo — Volver a aplicar</div>
+      </div>
+    </div>
+    <button class="main-btn" id="cartaBtn" onclick="runCarta()">Generar Carta "El Abrazo Literario" ✦</button>
+  </div>
+  <div class="loading" id="cartaLoading">Redactando con amor y profesionalismo</div>
+  <div class="error" id="cartaError"></div>
+  <div id="cartaResult" style="display:none">
+    <hr class="divider" />
+    <div class="carta-preview" id="cartaContent"></div>
+    <button class="copy-btn" onclick="copyCarta()">Copiar carta al portapapeles</button>
+    <button class="sec-btn" style="margin-top:10px" onclick="resetCarta()">← Generar otra versión</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// Configurar PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+var pdfText=null,inputMode='pdf',veredicto='A',evalData=null;
+
+var SEVAL='Eres el Editor Maestro de Bambook, editorial infantil latinoamericana de Kattia Orellana B. Eslogan: Historias que abrazan. Responde UNICAMENTE con JSON puro valido, sin texto antes ni despues, sin bloques markdown.\n{"bienvenida":"2-3 oraciones calidas al autor","puntuacion":8,"veredicto_corto":"frase breve","niveles":[{"nivel":1,"nombre":"El Pulso de la Empatia","subtitulo":"El Abrazo","evaluacion":"analisis detallado"},{"nivel":2,"nombre":"Arquitectura Linguistica Evolutiva","subtitulo":"Ajuste de Lenguaje","evaluacion":"analisis detallado"},{"nivel":3,"nombre":"El Gen de la Imaginacion","subtitulo":"Active Learning","evaluacion":"analisis detallado"},{"nivel":4,"nombre":"Blindaje Cultural Latino","subtitulo":"Identidad Regional","evaluacion":"analisis detallado"},{"nivel":5,"nombre":"Potencial de Legado","subtitulo":"KDP Strategy","evaluacion":"analisis detallado"}],"luces":["luz1","luz2"],"oportunidades":[{"titulo":"titulo","detalle":"detalle concreto"}],"kdp":{"titulo":"titulo KDP","subtitulo":"subtitulo keywords","descripcion":"100-150 palabras Amazon","keywords":["k1","k2","k3","k4","k5","k6","k7"]}}';
+
+var SCARTA='Eres el Editor Maestro de Bambook. Redactas la carta El Abrazo Literario de Kattia Orellana B. Responde UNICAMENTE con JSON puro: {"carta":"texto completo con saltos de linea reales"}. Secciones: Asunto y saludo, apertura calida, seccion emoji 🌟 Luces, seccion emoji 💎 Oportunidades, seccion emoji 🚌 Veredicto, cierre. Firma: Con admiracion y respeto, / Bambook Editor Genius / En representacion de Kattia Orellana B. y el equipo de Editorial Bambook';
+
+async function extractTextFromPDF(file) {
+  var arrayBuffer = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  var text = '';
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var content = await page.getTextContent();
+    var pageText = content.items.map(function(item) { return item.str; }).join(' ');
+    text += pageText + '\n';
+  }
+  return text.trim();
+}
+
+function switchMode(m){
+  inputMode=m;
+  document.getElementById('pdfArea').style.display=m==='pdf'?'block':'none';
+  document.getElementById('textArea').style.display=m==='text'?'block':'none';
+  document.getElementById('btnPDF').classList.toggle('active',m==='pdf');
+  document.getElementById('btnText').classList.toggle('active',m==='text');
+}
+
+async function onFileSelected(input){
+  var file=input.files[0]; if(!file)return;
+  document.getElementById('uploadTitle').textContent='Extrayendo texto del PDF...';
+  try {
+    pdfText = await extractTextFromPDF(file);
+    document.getElementById('uploadBox').classList.add('loaded');
+    document.getElementById('uploadTitle').textContent='PDF cargado correctamente';
+    document.getElementById('uploadName').textContent='✓ '+file.name+' ('+pdfText.length+' caracteres extraídos)';
+    document.getElementById('uploadName').style.display='block';
+  } catch(e) {
+    document.getElementById('uploadTitle').textContent='Error al leer el PDF. Usá "Pegar texto".';
+  }
+}
+
+function showTab(n){
+  document.getElementById('panel1').classList.toggle('visible',n===1);
+  document.getElementById('panel2').classList.toggle('visible',n===2);
+  document.getElementById('tab1').classList.toggle('active',n===1);
+  document.getElementById('tab2').classList.toggle('active',n===2);
+  if(n===2&&!evalData){document.getElementById('cartaSinData').style.display='block';document.getElementById('cartaFormDiv').style.display='none';}
+}
+
+async function callAPI(system,messages){
+  var res=await fetch('/api/proxy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:system,messages:messages})
+  });
+  if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error((e.error&&e.error.message)||'Error '+res.status);}
+  var d=await res.json();
+  var t='';for(var i=0;i<d.content.length;i++){if(d.content[i].type==='text')t+=d.content[i].text;}
+  return t;
+}
+
+async function runEval(){
+  var title=document.getElementById('titleInput').value.trim();
+  var age=document.getElementById('ageSelect').value;
+  var manuscrito='';
+
+  if(inputMode==='pdf'){
+    if(!pdfText){alert('Por favor subí un PDF primero.');return;}
+    manuscrito=pdfText;
+  } else {
+    manuscrito=document.getElementById('textInput').value.trim();
+    if(!manuscrito){alert('Por favor pegá el texto.');return;}
+  }
+
+  document.getElementById('evalBtn').disabled=true;
+  document.getElementById('evalResult').style.display='none';
+  document.getElementById('evalError').className='error';
+  document.getElementById('evalLoading').className='loading on';
+
+  var messages=[{role:'user',content:'Titulo: '+(title||'Sin titulo')+'\nEdad: '+age+'\n\nMANUSCRITO:\n'+manuscrito}];
+
+  try{
+    var raw=await callAPI(SEVAL,messages);
+    evalData=JSON.parse(raw.replace(/```json/g,'').replace(/```/g,'').trim());
+    evalData._title=title||'Sin titulo';evalData._age=age;
+    renderEval(evalData);
+  }catch(err){
+    document.getElementById('evalError').textContent='Error: '+err.message;
+    document.getElementById('evalError').className='error on';
+  }
+  document.getElementById('evalLoading').className='loading';
+  document.getElementById('evalBtn').disabled=false;
+}
+
+function renderEval(r){
+  document.getElementById('resBienvenida').textContent=r.bienvenida||'';
+  document.getElementById('resPuntuacion').textContent=r.puntuacion||'—';
+  document.getElementById('resVeredicto').textContent=r.veredicto_corto||'';
+  var cols=['c1','c2','c3','c4','c5'];
+  var grid=document.getElementById('resNiveles');grid.innerHTML='';
+  (r.niveles||[]).forEach(function(n,i){
+    var c=document.createElement('div');c.className='d-card';
+    c.innerHTML='<div class="d-head"><div class="d-badge '+cols[i]+'">'+n.nivel+'</div><div><div class="d-name">'+n.nombre+'</div><div class="d-sub">'+n.subtitulo+'</div></div></div><div class="d-body">'+n.evaluacion+'</div>';
+    grid.appendChild(c);
+  });
+  if(r.kdp){
+    document.getElementById('resKdpContent').innerHTML=
+      '<div class="kdp-row"><span class="kdp-k">Título</span><span class="kdp-v">'+r.kdp.titulo+'</span></div>'+
+      '<div class="kdp-row"><span class="kdp-k">Subtítulo</span><span class="kdp-v">'+r.kdp.subtitulo+'</span></div>'+
+      '<div class="kdp-row"><span class="kdp-k">Descripción</span><span class="kdp-v">'+r.kdp.descripcion+'</span></div>'+
+      '<div class="kdp-row"><span class="kdp-k">Keywords</span><span class="kdp-v">'+(r.kdp.keywords||[]).join(' · ')+'</span></div>';
+    document.getElementById('resKdp').style.display='block';
+  }
+  document.getElementById('evalResult').style.display='block';
+  document.getElementById('evalResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function irACarta(){
+  showTab(2);
+  document.getElementById('cartaSinData').style.display='none';
+  document.getElementById('cartaFormDiv').style.display='block';
+  document.getElementById('cartaResult').style.display='none';
+}
+
+function resetEval(){
+  evalData=null;pdfText=null;
+  document.getElementById('titleInput').value='';
+  document.getElementById('textInput').value='';
+  document.getElementById('evalResult').style.display='none';
+  document.getElementById('resNiveles').innerHTML='';
+  document.getElementById('resKdp').style.display='none';
+  document.getElementById('uploadBox').classList.remove('loaded');
+  document.getElementById('uploadTitle').textContent='Hacé clic aquí para subir tu PDF';
+  document.getElementById('uploadName').style.display='none';
+  document.getElementById('fileInput').value='';
+}
+
+function selectVeredicto(v){
+  veredicto=v;
+  document.getElementById('vOptA').classList.toggle('selected',v==='A');
+  document.getElementById('vOptB').classList.toggle('selected',v==='B');
+}
+
+async function runCarta(){
+  if(!evalData)return;
+  var author=document.getElementById('authorInput').value.trim()||'autor/a';
+  var conv=document.getElementById('convInput').value.trim()||'nuestra convocatoria';
+  document.getElementById('cartaBtn').disabled=true;
+  document.getElementById('cartaResult').style.display='none';
+  document.getElementById('cartaError').className='error';
+  document.getElementById('cartaLoading').className='loading on';
+  var msg='Genera la carta para:\n- Autor/a: '+author+'\n- Titulo: '+evalData._title+'\n- Edad: '+evalData._age+'\n- Convocatoria: '+conv+'\n- Puntuacion: '+evalData.puntuacion+'/10\n- Nivel: '+(evalData.veredicto_corto||'')+'\n- Veredicto: '+(veredicto==='A'?'Seleccion invitar a publicar':'Seguir puliendo no avanzar pero animar')+'\n- Luces: '+(evalData.luces||[]).join(' | ')+'\n- Oportunidades: '+(evalData.oportunidades||[]).map(function(o){return o.titulo+': '+o.detalle;}).join(' | ')+'\n- Titulo KDP: '+(evalData.kdp?evalData.kdp.titulo:'');
+  try{
+    var raw=await callAPI(SCARTA,[{role:'user',content:msg}]);
+    var parsed=JSON.parse(raw.replace(/```json/g,'').replace(/```/g,'').trim());
+    renderCarta(parsed.carta);
+  }catch(err){
+    document.getElementById('cartaError').textContent='Error: '+err.message;
+    document.getElementById('cartaError').className='error on';
+  }
+  document.getElementById('cartaLoading').className='loading';
+  document.getElementById('cartaBtn').disabled=false;
+}
+
+function renderCarta(text){
+  var el=document.getElementById('cartaContent');el.innerHTML='';
+  text.split('\n').forEach(function(line){
+    var p=document.createElement('p');
+    if(line.startsWith('🌟')||line.startsWith('💎')||line.startsWith('🚌')){p.style.fontWeight='700';p.style.fontSize='15px';p.style.marginTop='20px';}
+    if(line.startsWith('Con admiraci')||line.startsWith('Bambook')||line.startsWith('En representaci')){p.style.fontStyle='italic';p.style.color='#888780';p.style.fontSize='13px';}
+    if(line.startsWith('Asunto')||line.startsWith('Estimado')){p.style.fontFamily="'Playfair Display',serif";p.style.fontSize='15px';}
+    p.textContent=line||'\u00A0';el.appendChild(p);
+  });
+  window._cartaText=text;
+  document.getElementById('cartaResult').style.display='block';
+  document.getElementById('cartaResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyCarta(){
+  var b=document.querySelector('.copy-btn');
+  navigator.clipboard.writeText(window._cartaText||'').then(function(){
+    b.textContent='✓ Carta copiada';
+    setTimeout(function(){b.textContent='Copiar carta al portapapeles';},2500);
+  }).catch(function(){alert('Seleccioná el texto manualmente.');});
+}
+
+function resetCarta(){
+  document.getElementById('cartaResult').style.display='none';
+  document.getElementById('authorInput').value='';
+  document.getElementById('convInput').value='';
+}
+</script>
+</body>
+</html>
